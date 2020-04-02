@@ -8,3 +8,4 @@ Build a flask app with Aws
 
 #### Arch Diagram
 
+![Image](https://github.com/alikayaa/aws-build/blob/master/Arch%2BDiagram.jpg)
