@@ -41,7 +41,8 @@ def home():
     # s3 getting a list of photos in the bucket
     #####
     s3_client = boto3.client('s3', aws_access_key_id=config.ACCESS_KEY,
-                             aws_secret_access_key=config.SECRET_KEY)
+                             aws_secret_access_key=config.SECRET_KEY,
+                             region_name=config.REGION)
     prefix = "photos/"
     response = s3_client.list_objects(
         Bucket=config.PHOTOS_BUCKET,
@@ -74,6 +75,21 @@ def home():
                 'get_object',
                 Params={'Bucket': config.PHOTOS_BUCKET, 'Key': key})
 
+            #######
+            # rekcognition exercise
+            #######
+            rek = boto3.client('rekognition', aws_access_key_id=config.ACCESS_KEY,
+                             aws_secret_access_key=config.SECRET_KEY,
+                             region_name=config.REGION)
+            response = rek.detect_labels(
+                Image={
+                    'S3Object': {
+                        'Bucket': config.PHOTOS_BUCKET,
+                        'Name': key
+                    }
+                })
+            all_labels = [label for label in response['Labels']]
+            print(all_labels)
     return render_template_string("""
             {% extends "main.html" %}
             {% block content %}
@@ -98,10 +114,10 @@ def home():
             <h3>Uploaded!</h3>
             <img src="{{url}}" /><br/>
             {% for label in all_labels %}
-            <span class="label label-info">{{label}}</span>
+            <span class="label label-info">{{label.Name}} % {{label.Confidence}}</span>
             {% endfor %}
             {% endif %}
-            
+
             {% if photos %}
             <hr/>
             <h4>Photos</h4>
